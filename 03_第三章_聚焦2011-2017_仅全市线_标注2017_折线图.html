@@ -80,7 +80,7 @@ const years = DATA.years;
 const districts = DATA.districts;
 const state = { visible:new Set(), showCity:true, yearsFocus:[2011,2017], marks:[{year:2017,label:"2017 破1500万",color:"#1f2933"}] };
 function xBounds(){ return state.yearsFocus||[years[0],years[years.length-1]]; }
-const W=960, H=360, M={t:20,r:22,b:40,l:60};
+const W=960, H=360, M={t:20,r:60,b:40,l:60};
 
 function colorOf(d){ return COLORS[districts.indexOf(d)]; }
 // 人口总量按 万人 绘制；密度按 人/km²
