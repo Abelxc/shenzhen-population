@@ -80,7 +80,7 @@ const years = DATA.years;
 const districts = DATA.districts;
 const state = { visible:new Set(), showCity:true, yearsFocus:[2021,2023], marks:[{year:2022,label:"2022 首降",color:"#C0392B"}] };
 function xBounds(){ return state.yearsFocus||[years[0],years[years.length-1]]; }
-const W=960, H=360, M={t:20,r:22,b:40,l:60};
+const W=960, H=360, M={t:20,r:60,b:40,l:60};
 
 function colorOf(d){ return COLORS[districts.indexOf(d)]; }
 // 人口总量按 万人 绘制；密度按 人/km²
