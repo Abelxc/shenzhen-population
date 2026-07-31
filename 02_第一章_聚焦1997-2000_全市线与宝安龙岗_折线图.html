@@ -1,228 +1,137 @@
 <!DOCTYPE html>
 <html lang="zh-CN">
 <head>
-<meta charset="utf-8">
-<meta name="viewport" content="width=device-width, initial-scale=1">
-<!--
-  深圳市人口总量与密度时间变化（1997–2020）
-  · 单文件离线版：无 CDN / 无外部依赖，断网可直接双击打开。
-  · 嵌入 GeoScene Online 地图故事：将此文件托管到可访问 URL（如 GeoScene Online 内容/
-    任意静态空间），在地图故事里用"嵌入网页/iframe"组件填入该 URL 即可。
-  数据来源：深圳市土地利用 CCI 口径 geojson 之 pop_total / density 字段。
--->
-<title>深圳人口·第一章起点（聚焦1997–2000）</title>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>1997，一条刚起跑的曲线（聚焦 1997–2000）</title>
+<script src="https://cdn.jsdelivr.net/npm/echarts@5.5.0/dist/echarts.min.js"></script>
 <style>
-  :root{--bg:#ffffff;--panel:#f6f8fb;--ink:#1f2933;--muted:#6b7280;--grid:#e6eaf0;--accent:#2b6cb0;--city:#1f2933;}
-  *{box-sizing:border-box;}
-  body{margin:0;font-family:-apple-system,"PingFang SC","Microsoft YaHei",Segoe UI,Roboto,sans-serif;color:var(--ink);background:var(--bg);}
+  :root{--bg:#ffffff;--panel:#f6f8fb;--ink:#1f2933;--muted:#6b7280;--line:#e6eaf0;--accent:#2b6cb0;}
+  body{margin:0;background:var(--bg);color:var(--ink);font-family:-apple-system,BlinkMacSystemFont,"Segoe UI",Roboto,"Helvetica Neue",Arial,"PingFang SC","Microsoft YaHei",sans-serif;}
   .wrap{max-width:1080px;margin:0 auto;padding:22px 20px 36px;}
-  header h1{font-size:21px;margin:0 0 4px;}
-  header p{color:var(--muted);margin:0 0 14px;font-size:13px;}
-  .controls{display:flex;flex-wrap:wrap;gap:14px;align-items:center;background:var(--panel);border:1px solid var(--grid);border-radius:10px;padding:12px 14px;margin-bottom:14px;}
-  .chips{display:flex;flex-wrap:wrap;gap:8px;}
-  .chip{display:inline-flex;align-items:center;gap:6px;font-size:12.5px;border:1px solid var(--grid);border-radius:999px;padding:4px 11px;cursor:pointer;user-select:none;background:#fff;transition:.15s;}
-  .chip .dot{width:13px;height:13px;border-radius:3px;background:currentColor;}
-  .chip.off{opacity:.38;background:#fafafa;}
-  .citybtn{margin-left:auto;display:inline-flex;align-items:center;gap:7px;font-size:12.5px;border:1px solid var(--grid);border-radius:999px;padding:5px 13px;cursor:pointer;background:#fff;color:var(--ink);}
-  .citybtn .bar{width:18px;height:3px;background:var(--city);border-radius:2px;}
-  .citybtn.off{opacity:.45;}
-  .card{background:#fff;border:1px solid var(--grid);border-radius:12px;padding:12px 12px 6px;margin-bottom:14px;}
-  .card h2{font-size:14.5px;margin:2px 4px 6px;font-weight:600;}
-  svg{width:100%;height:auto;display:block;}
-  .tip{position:absolute;pointer-events:none;background:rgba(31,41,51,.96);color:#fff;font-size:12px;padding:8px 11px;border-radius:8px;line-height:1.55;opacity:0;transition:.08s;z-index:5;min-width:150px;}
-  .legend{display:flex;flex-wrap:wrap;gap:16px;margin:8px 4px 0;font-size:12.5px;color:var(--muted);}
-  .legend span{display:inline-flex;align-items:center;gap:6px;}
-  .legend i{width:13px;height:13px;display:inline-block;border-radius:3px;background:currentColor;}
-  .note{color:var(--muted);font-size:12px;margin-top:6px;line-height:1.65;}
-  .preset{background:#eef4fb;border-left:3px solid var(--accent);color:#33414f;font-size:12.5px;padding:8px 12px;border-radius:0 8px 8px 0;margin:0 0 14px;line-height:1.7;}
-  .preset b{color:#1f2933;}
-  .axis text{fill:var(--muted);font-size:11px;}
-  .gridline{stroke:var(--grid);stroke-dasharray:2 3;}
-  .aline{fill:none;stroke-width:2.4;stroke-linejoin:round;stroke-linecap:round;}
-  .hoverline{stroke:var(--muted);stroke-width:1;stroke-dasharray:3 3;}
+  header h1{font-size:22px;margin:0 0 18px;line-height:1.35;}
+  .card{background:#fff;border:1px solid var(--line);border-radius:12px;padding:12px 12px 6px;margin-bottom:14px;box-shadow:0 2px 8px rgba(0,0,0,.04);}
+  .chart{width:100%;height:380px;}
+  .note{font-size:12.5px;color:var(--muted);line-height:1.75;margin-top:18px;padding-top:14px;border-top:1px solid var(--line);}
 </style>
 </head>
 <body>
 <div class="wrap">
-  <header>
-    <h1>1997，一条刚起跑的曲线（聚焦 1997–2000）</h1>
-  </header>
-  <div class="controls">
-    <div class="chips" id="chips"></div>
-    <div class="citybtn" id="cityBtn"><span class="bar"></span>全市合计线</div>
-  </div>
-
-  <div class="card">
-    <h2>人口总量（万人）</h2>
-    <div style="position:relative;">
-      <svg id="chartPop" viewBox="0 0 960 360" preserveAspectRatio="xMidYMid meet"></svg>
-      <div class="tip" id="tipPop"></div>
-    </div>
-  </div>
-
-  <div class="card">
-    <h2>人口密度（人 / km²）</h2>
-    <div style="position:relative;">
-      <svg id="chartDens" viewBox="0 0 960 360" preserveAspectRatio="xMidYMid meet"></svg>
-      <div class="tip" id="tipDens"></div>
-    </div>
-  </div>
-
-  <div class="legend" id="legend"></div>
+  <header><h1>1997，一条刚起跑的曲线（聚焦 1997–2000）</h1></header>
+  <div class="card"><div id="chart-pop" class="chart"></div></div>
+  <div class="card"><div id="chart-dens" class="chart"></div></div>
   <div class="note" id="note"></div>
 </div>
 <script>
-const DATA = {"years": [1997, 1998, 1999, 2000, 2001, 2002, 2003, 2004, 2005, 2006, 2007, 2008, 2009, 2010, 2011, 2012, 2013, 2014, 2015, 2016, 2017, 2018, 2019, 2020, 2021, 2022, 2023], "districts": ["光明区", "南山区", "坪山区", "宝安区", "盐田区", "福田区", "罗湖区", "龙华区", "龙岗区"], "recs": {"光明区": {"2018": [625011.0, 4003.9, 156.1], "2019": [1012197.0, 6484.3, 156.1], "2020": [1103505.0, 7069.2, 156.1], "2021": [1115696.0, 7147.3, 156.1], "2022": [1150902.0, 7372.9, 156.1], "2023": [1159044.0, 7425.0, 156.1]}, "南山区": {"1997": [500100.0, 2667.2, 187.5], "1998": [554800.0, 2958.9, 187.5], "1999": [636200.0, 3393.1, 187.5], "2000": [722500.0, 3853.3, 187.5], "2001": [751100.0, 4005.9, 187.5], "2002": [776700.0, 4142.4, 187.5], "2003": [811600.0, 4328.5, 187.5], "2004": [853200.0, 4550.4, 187.5], "2005": [900600.0, 4803.2, 187.5], "2006": [934800.0, 4985.6, 187.5], "2007": [961300.0, 5126.9, 187.5], "2008": [1009800.0, 5385.6, 187.5], "2009": [1062700.0, 5667.7, 187.5], "2010": [1089400.0, 5810.1, 187.5], "2011": [1154800.0, 6158.9, 187.5], "2012": [1228400.0, 6551.5, 187.5], "2013": [1303100.0, 6949.9, 187.5], "2014": [1387900.0, 7402.1, 187.5], "2015": [1480300.0, 7894.9, 187.5], "2016": [1562300.0, 8332.3, 187.5], "2017": [1640200.0, 8747.7, 187.5], "2018": [1707600.0, 9107.2, 187.5], "2019": [1737000.0, 9264.0, 187.5], "2020": [1804200.0, 9622.4, 187.5], "2021": [1814100.0, 9675.2, 187.5], "2022": [1810000.0, 9653.3, 187.5], "2023": [1818600.0, 9699.2, 187.5]}, "坪山区": {"2017": [498100.0, 2964.9, 168.0], "2018": [516600.0, 3075.0, 168.0], "2019": [527800.0, 3141.7, 168.0], "2020": [554300.0, 3299.4, 168.0], "2021": [566500.0, 3372.0, 168.0], "2022": [608700.0, 3623.2, 168.0], "2023": [616100.0, 3667.3, 168.0]}, "宝安区": {"1997": [2279600.0, 3130.0, 728.3], "1998": [2369600.0, 3253.6, 728.3], "1999": [2466100.0, 3386.1, 728.3], "2000": [2736500.0, 3757.4, 728.3], "2001": [2824100.0, 3877.7, 728.3], "2002": [2935500.0, 4030.6, 728.3], "2003": [3103000.0, 4260.6, 728.3], "2004": [3182700.0, 4370.0, 728.3], "2005": [3300500.0, 4531.8, 728.3], "2006": [3532400.0, 4850.2, 728.3], "2007": [3385700.0, 4648.8, 728.3], "2008": [3609200.0, 4955.7, 728.3], "2009": [3827800.0, 5255.8, 728.3], "2010": [4023600.0, 5524.6, 728.3], "2011": [4461600.0, 6126.0, 728.3], "2012": [4819100.0, 6616.9, 728.3], "2013": [5094700.0, 6995.3, 728.3], "2014": [5339600.0, 7331.6, 728.3], "2015": [6274510.0, 8615.3, 728.3], "2016": [6658558.0, 9142.6, 728.3], "2017": [4834400.0, 8746.9, 552.7], "2018": [4432100.0, 11175.2, 396.6], "2019": [4471300.0, 11274.1, 396.6], "2020": [4491100.0, 11324.0, 396.6], "2021": [4482900.0, 11303.3, 396.6], "2022": [4545300.0, 11460.7, 396.6], "2023": [4565400.0, 11511.3, 396.6]}, "盐田区": {"1998": [134368.0, 1791.6, 75.0], "1999": [143002.0, 1906.7, 75.0], "2000": [152400.0, 2032.0, 75.0], "2001": [171698.0, 2289.3, 75.0], "2002": [190955.0, 2546.1, 75.0], "2003": [207983.0, 2773.1, 75.0], "2004": [212412.0, 2832.2, 75.0], "2005": [215800.0, 2877.3, 75.0], "2006": [218672.0, 2915.6, 75.0], "2007": [221295.0, 2950.6, 75.0], "2008": [215541.0, 2873.9, 75.0], "2009": [206704.0, 2756.1, 75.0], "2010": [209089.0, 2787.9, 75.0], "2011": [211018.0, 2813.6, 75.0], "2012": [207661.0, 2768.8, 75.0], "2013": [210433.0, 2805.8, 75.0], "2014": [212603.0, 2834.7, 75.0], "2015": [217118.0, 2894.9, 75.0], "2016": [220761.0, 2943.5, 75.0], "2017": [219436.0, 2925.8, 75.0], "2018": [218238.0, 2909.8, 75.0], "2019": [215514.0, 2873.5, 75.0], "2020": [214326.0, 2857.7, 75.0], "2021": [215407.0, 2872.1, 75.0], "2022": [211549.0, 2820.7, 75.0], "2023": [212376.0, 2831.7, 75.0]}, "福田区": {"1997": [648945.0, 8245.8, 78.7], "1998": [733846.0, 9324.6, 78.7], "1999": [809962.0, 10291.8, 78.7], "2000": [910000.0, 11562.9, 78.7], "2001": [970845.0, 12336.0, 78.7], "2002": [1007799.0, 12805.6, 78.7], "2003": [1066891.0, 13556.4, 78.7], "2004": [1121229.0, 14246.9, 78.7], "2005": [1160972.0, 14751.9, 78.7], "2006": [1202427.0, 15278.6, 78.7], "2007": [1233622.0, 15675.0, 78.7], "2008": [1265626.0, 16081.7, 78.7], "2009": [1298460.0, 16498.9, 78.7], "2010": [1319587.0, 16767.3, 78.7], "2011": [1321014.0, 16785.4, 78.7], "2012": [1327461.0, 16867.4, 78.7], "2013": [1351213.0, 17169.2, 78.7], "2014": [1387644.0, 17632.1, 78.7], "2015": [1436699.0, 18255.4, 78.7], "2016": [1492717.0, 18967.2, 78.7], "2017": [1511966.0, 19211.8, 78.7], "2018": [1528902.0, 19427.0, 78.7], "2019": [1532285.0, 19469.9, 78.7], "2020": [1554069.0, 19746.7, 78.7], "2021": [1562282.0, 19851.1, 78.7], "2022": [1514702.0, 19246.5, 78.7], "2023": [1520978.0, 19326.3, 78.7]}, "罗湖区": {"1997": [618517.0, 4024.2, 153.7], "1998": [650857.0, 8259.6, 78.8], "1999": [705999.0, 8959.4, 78.8], "2000": [775200.0, 9837.6, 78.8], "2001": [798812.0, 10137.2, 78.8], "2002": [808728.0, 10263.0, 78.8], "2003": [825624.0, 10477.5, 78.8], "2004": [844500.0, 10717.0, 78.8], "2005": [860400.0, 10918.8, 78.8], "2006": [879329.0, 11159.0, 78.8], "2007": [898157.0, 11397.9, 78.8], "2008": [905003.0, 11484.8, 78.8], "2009": [912243.0, 11576.7, 78.8], "2010": [924490.0, 11732.1, 78.8], "2011": [930996.0, 11814.7, 78.8], "2012": [936413.0, 11883.4, 78.8], "2013": [941537.0, 11948.4, 78.8], "2014": [953714.0, 12103.0, 78.8], "2015": [975621.0, 12381.0, 78.8], "2016": [1004000.0, 12741.1, 78.8], "2017": [1027200.0, 13035.5, 78.8], "2018": [1039900.0, 13196.7, 78.8], "2019": [1056600.0, 13408.6, 78.8], "2020": [1147500.0, 14562.2, 78.8], "2021": [1148200.0, 14571.1, 78.8], "2022": [1018000.0, 12918.8, 78.8], "2023": [1034600.0, 13129.4, 78.8]}, "龙华区": {"2017": [2202400.0, 12542.1, 175.6], "2018": [2346500.0, 13362.8, 175.6], "2019": [2427100.0, 13821.8, 175.6], "2020": [2543200.0, 14482.9, 175.6], "2021": [2535100.0, 14436.8, 175.6], "2022": [2490000.0, 14180.0, 175.6], "2023": [2518400.0, 14341.7, 175.6]}, "龙岗区": {"1997": [1230248.0, 1446.7, 850.4], "1998": [1359830.0, 1599.0, 850.4], "1999": [1564352.0, 1839.5, 850.4], "2000": [1715800.0, 2017.6, 850.4], "2001": [1729100.0, 2033.3, 850.4], "2002": [1746500.0, 2053.7, 850.4], "2003": [1767500.0, 2078.4, 850.4], "2004": [1793900.0, 2109.5, 850.4], "2005": [1839200.0, 2162.7, 850.4], "2006": [1943360.0, 2285.2, 850.4], "2007": [2040065.0, 2398.9, 850.4], "2008": [2137853.0, 2513.9, 850.4], "2009": [2226329.0, 2618.0, 850.4], "2010": [2324292.0, 2733.2, 850.4], "2011": [2615400.0, 3075.5, 850.4], "2012": [2854919.0, 3357.1, 850.4], "2013": [3040090.0, 3574.9, 850.4], "2014": [3217532.0, 3783.6, 850.4], "2015": [3479795.0, 4092.0, 850.4], "2016": [3751172.0, 4411.1, 850.4], "2017": [3557434.0, 5213.1, 682.4], "2018": [3817122.0, 5593.7, 682.4], "2019": [4002042.0, 5864.7, 682.4], "2020": [4155921.0, 6090.2, 682.4], "2021": [4174624.0, 6117.6, 682.4], "2022": [4239886.0, 6213.2, 682.4], "2023": [4265302.0, 6250.4, 682.4]}}, "cityPop": {"1997": 5277410.0, "1998": 5803301.0, "1999": 6325615.0, "2000": 7012400.0, "2001": 7245655.0, "2002": 7466182.0, "2003": 7782598.0, "2004": 8007941.0, "2005": 8277472.0, "2006": 8710988.0, "2007": 8740139.0, "2008": 9143023.0, "2009": 9534236.0, "2010": 9890458.0, "2011": 10694828.0, "2012": 11373954.0, "2013": 11941073.0, "2014": 12498993.0, "2015": 13864043.0, "2016": 14689508.0, "2017": 15491136.0, "2018": 16231973.0, "2019": 16981838.0, "2020": 17568121.0, "2021": 17614809.0, "2022": 17589039.0, "2023": 17710800.0}, "cityDens": {"1997": 2640.5533873711597, "1998": 2903.5377995697204, "1999": 3164.86466203032, "2000": 3508.4805123330166, "2001": 3625.183869515185, "2002": 3735.519087406815, "2003": 3893.829989493171, "2004": 4006.574773602842, "2005": 4141.4279281533, "2006": 4358.326912493121, "2007": 4372.911892730275, "2008": 4574.484915194877, "2009": 4770.2186421173765, "2010": 4948.44548956822, "2011": 5350.892079851904, "2012": 5690.675939360585, "2013": 5974.419872917397, "2014": 6253.561314854656, "2015": 6936.530244659029, "2016": 7349.531195276931, "2017": 7750.60589383099, "2018": 8121.265322459599, "2019": 8496.441687096612, "2020": 8789.773853004453, "2021": 8813.133036473708, "2022": 8800.239655776255, "2023": 8861.159753839996}};
-const CITY = "__CITY__";
-// 9 个行政区配色（清晰区分）
-const COLORS = ["#C0392B","#E8A33D","#2E8B57","#2980B9","#8E44AD","#16A085","#D35400","#2C3E50","#7FB800"];
-const years = DATA.years;
-const districts = DATA.districts;
-const state = { visible:new Set(["宝安区","龙岗区"]), showCity:true, yearsFocus:[1997,2000] };
-function xBounds(){ return state.yearsFocus||[years[0],years[years.length-1]]; }
-const W=960, H=360, M={t:20,r:60,b:40,l:60};
+const POP_DATA = {"years": [1997, 1998, 1999, 2000, 2001, 2002, 2003, 2004, 2005, 2006, 2007, 2008, 2009, 2010, 2011, 2012, 2013, 2014, 2015, 2016, 2017, 2018, 2019, 2020, 2021, 2022, 2023], "districts": ["光明区", "南山区", "坪山区", "宝安区", "盐田区", "福田区", "罗湖区", "龙华区", "龙岗区"], "recs": {"光明区": {"2018": [625011.0, 4003.9, 156.1], "2019": [1012197.0, 6484.3, 156.1], "2020": [1103505.0, 7069.2, 156.1], "2021": [1115696.0, 7147.3, 156.1], "2022": [1150902.0, 7372.9, 156.1], "2023": [1159044.0, 7425.0, 156.1]}, "南山区": {"1997": [500100.0, 2667.2, 187.5], "1998": [554800.0, 2958.9, 187.5], "1999": [636200.0, 3393.1, 187.5], "2000": [722500.0, 3853.3, 187.5], "2001": [751100.0, 4005.9, 187.5], "2002": [776700.0, 4142.4, 187.5], "2003": [811600.0, 4328.5, 187.5], "2004": [853200.0, 4550.4, 187.5], "2005": [900600.0, 4803.2, 187.5], "2006": [934800.0, 4985.6, 187.5], "2007": [961300.0, 5126.9, 187.5], "2008": [1009800.0, 5385.6, 187.5], "2009": [1062700.0, 5667.7, 187.5], "2010": [1089400.0, 5810.1, 187.5], "2011": [1154800.0, 6158.9, 187.5], "2012": [1228400.0, 6551.5, 187.5], "2013": [1303100.0, 6949.9, 187.5], "2014": [1387900.0, 7402.1, 187.5], "2015": [1480300.0, 7894.9, 187.5], "2016": [1562300.0, 8332.3, 187.5], "2017": [1640200.0, 8747.7, 187.5], "2018": [1707600.0, 9107.2, 187.5], "2019": [1737000.0, 9264.0, 187.5], "2020": [1804200.0, 9622.4, 187.5], "2021": [1814100.0, 9675.2, 187.5], "2022": [1810000.0, 9653.3, 187.5], "2023": [1818600.0, 9699.2, 187.5]}, "坪山区": {"2017": [498100.0, 2964.9, 168.0], "2018": [516600.0, 3075.0, 168.0], "2019": [527800.0, 3141.7, 168.0], "2020": [554300.0, 3299.4, 168.0], "2021": [566500.0, 3372.0, 168.0], "2022": [608700.0, 3623.2, 168.0], "2023": [616100.0, 3667.3, 168.0]}, "宝安区": {"1997": [2279600.0, 3130.0, 728.3], "1998": [2369600.0, 3253.6, 728.3], "1999": [2466100.0, 3386.1, 728.3], "2000": [2736500.0, 3757.4, 728.3], "2001": [2824100.0, 3877.7, 728.3], "2002": [2935500.0, 4030.6, 728.3], "2003": [3103000.0, 4260.6, 728.3], "2004": [3182700.0, 4370.0, 728.3], "2005": [3300500.0, 4531.8, 728.3], "2006": [3532400.0, 4850.2, 728.3], "2007": [3385700.0, 4648.8, 728.3], "2008": [3609200.0, 4955.7, 728.3], "2009": [3827800.0, 5255.8, 728.3], "2010": [4023600.0, 5524.6, 728.3], "2011": [4461600.0, 6126.0, 728.3], "2012": [4819100.0, 6616.9, 728.3], "2013": [5094700.0, 6995.3, 728.3], "2014": [5339600.0, 7331.6, 728.3], "2015": [6274510.0, 8615.3, 728.3], "2016": [6658558.0, 9142.6, 728.3], "2017": [4834400.0, 8746.9, 552.7], "2018": [4432100.0, 11175.2, 396.6], "2019": [4471300.0, 11274.1, 396.6], "2020": [4491100.0, 11324.0, 396.6], "2021": [4482900.0, 11303.3, 396.6], "2022": [4545300.0, 11460.7, 396.6], "2023": [4565400.0, 11511.3, 396.6]}, "盐田区": {"1998": [134368.0, 1791.6, 75.0], "1999": [143002.0, 1906.7, 75.0], "2000": [152400.0, 2032.0, 75.0], "2001": [171698.0, 2289.3, 75.0], "2002": [190955.0, 2546.1, 75.0], "2003": [207983.0, 2773.1, 75.0], "2004": [212412.0, 2832.2, 75.0], "2005": [215800.0, 2877.3, 75.0], "2006": [218672.0, 2915.6, 75.0], "2007": [221295.0, 2950.6, 75.0], "2008": [215541.0, 2873.9, 75.0], "2009": [206704.0, 2756.1, 75.0], "2010": [209089.0, 2787.9, 75.0], "2011": [211018.0, 2813.6, 75.0], "2012": [207661.0, 2768.8, 75.0], "2013": [210433.0, 2805.8, 75.0], "2014": [212603.0, 2834.7, 75.0], "2015": [217118.0, 2894.9, 75.0], "2016": [220761.0, 2943.5, 75.0], "2017": [219436.0, 2925.8, 75.0], "2018": [218238.0, 2909.8, 75.0], "2019": [215514.0, 2873.5, 75.0], "2020": [214326.0, 2857.7, 75.0], "2021": [215407.0, 2872.1, 75.0], "2022": [211549.0, 2820.7, 75.0], "2023": [212376.0, 2831.7, 75.0]}, "福田区": {"1997": [648945.0, 8245.8, 78.7], "1998": [733846.0, 9324.6, 78.7], "1999": [809962.0, 10291.8, 78.7], "2000": [910000.0, 11562.9, 78.7], "2001": [970845.0, 12336.0, 78.7], "2002": [1007799.0, 12805.6, 78.7], "2003": [1066891.0, 13556.4, 78.7], "2004": [1121229.0, 14246.9, 78.7], "2005": [1160972.0, 14751.9, 78.7], "2006": [1202427.0, 15278.6, 78.7], "2007": [1233622.0, 15675.0, 78.7], "2008": [1265626.0, 16081.7, 78.7], "2009": [1298460.0, 16498.9, 78.7], "2010": [1319587.0, 16767.3, 78.7], "2011": [1321014.0, 16785.4, 78.7], "2012": [1327461.0, 16867.4, 78.7], "2013": [1351213.0, 17169.2, 78.7], "2014": [1387644.0, 17632.1, 78.7], "2015": [1436699.0, 18255.4, 78.7], "2016": [1492717.0, 18967.2, 78.7], "2017": [1511966.0, 19211.8, 78.7], "2018": [1528902.0, 19427.0, 78.7], "2019": [1532285.0, 19469.9, 78.7], "2020": [1554069.0, 19746.7, 78.7], "2021": [1562282.0, 19851.1, 78.7], "2022": [1514702.0, 19246.5, 78.7], "2023": [1520978.0, 19326.3, 78.7]}, "罗湖区": {"1997": [618517.0, 4024.2, 153.7], "1998": [650857.0, 8259.6, 78.8], "1999": [705999.0, 8959.4, 78.8], "2000": [775200.0, 9837.6, 78.8], "2001": [798812.0, 10137.2, 78.8], "2002": [808728.0, 10263.0, 78.8], "2003": [825624.0, 10477.5, 78.8], "2004": [844500.0, 10717.0, 78.8], "2005": [860400.0, 10918.8, 78.8], "2006": [879329.0, 11159.0, 78.8], "2007": [898157.0, 11397.9, 78.8], "2008": [905003.0, 11484.8, 78.8], "2009": [912243.0, 11576.7, 78.8], "2010": [924490.0, 11732.1, 78.8], "2011": [930996.0, 11814.7, 78.8], "2012": [936413.0, 11883.4, 78.8], "2013": [941537.0, 11948.4, 78.8], "2014": [953714.0, 12103.0, 78.8], "2015": [975621.0, 12381.0, 78.8], "2016": [1004000.0, 12741.1, 78.8], "2017": [1027200.0, 13035.5, 78.8], "2018": [1039900.0, 13196.7, 78.8], "2019": [1056600.0, 13408.6, 78.8], "2020": [1147500.0, 14562.2, 78.8], "2021": [1148200.0, 14571.1, 78.8], "2022": [1018000.0, 12918.8, 78.8], "2023": [1034600.0, 13129.4, 78.8]}, "龙华区": {"2017": [2202400.0, 12542.1, 175.6], "2018": [2346500.0, 13362.8, 175.6], "2019": [2427100.0, 13821.8, 175.6], "2020": [2543200.0, 14482.9, 175.6], "2021": [2535100.0, 14436.8, 175.6], "2022": [2490000.0, 14180.0, 175.6], "2023": [2518400.0, 14341.7, 175.6]}, "龙岗区": {"1997": [1230248.0, 1446.7, 850.4], "1998": [1359830.0, 1599.0, 850.4], "1999": [1564352.0, 1839.5, 850.4], "2000": [1715800.0, 2017.6, 850.4], "2001": [1729100.0, 2033.3, 850.4], "2002": [1746500.0, 2053.7, 850.4], "2003": [1767500.0, 2078.4, 850.4], "2004": [1793900.0, 2109.5, 850.4], "2005": [1839200.0, 2162.7, 850.4], "2006": [1943360.0, 2285.2, 850.4], "2007": [2040065.0, 2398.9, 850.4], "2008": [2137853.0, 2513.9, 850.4], "2009": [2226329.0, 2618.0, 850.4], "2010": [2324292.0, 2733.2, 850.4], "2011": [2615400.0, 3075.5, 850.4], "2012": [2854919.0, 3357.1, 850.4], "2013": [3040090.0, 3574.9, 850.4], "2014": [3217532.0, 3783.6, 850.4], "2015": [3479795.0, 4092.0, 850.4], "2016": [3751172.0, 4411.1, 850.4], "2017": [3557434.0, 5213.1, 682.4], "2018": [3817122.0, 5593.7, 682.4], "2019": [4002042.0, 5864.7, 682.4], "2020": [4155921.0, 6090.2, 682.4], "2021": [4174624.0, 6117.6, 682.4], "2022": [4239886.0, 6213.2, 682.4], "2023": [4265302.0, 6250.4, 682.4]}}, "cityPop": {"1997": 5277410.0, "1998": 5803301.0, "1999": 6325615.0, "2000": 7012400.0, "2001": 7245655.0, "2002": 7466182.0, "2003": 7782598.0, "2004": 8007941.0, "2005": 8277472.0, "2006": 8710988.0, "2007": 8740139.0, "2008": 9143023.0, "2009": 9534236.0, "2010": 9890458.0, "2011": 10694828.0, "2012": 11373954.0, "2013": 11941073.0, "2014": 12498993.0, "2015": 13864043.0, "2016": 14689508.0, "2017": 15491136.0, "2018": 16231973.0, "2019": 16981838.0, "2020": 17568121.0, "2021": 17614809.0, "2022": 17589039.0, "2023": 17710800.0}, "cityDens": {"1997": 2640.5533873711597, "1998": 2903.5377995697204, "1999": 3164.86466203032, "2000": 3508.4805123330166, "2001": 3625.183869515185, "2002": 3735.519087406815, "2003": 3893.829989493171, "2004": 4006.574773602842, "2005": 4141.4279281533, "2006": 4358.326912493121, "2007": 4372.911892730275, "2008": 4574.484915194877, "2009": 4770.2186421173765, "2010": 4948.44548956822, "2011": 5350.892079851904, "2012": 5690.675939360585, "2013": 5974.419872917397, "2014": 6253.561314854656, "2015": 6936.530244659029, "2016": 7349.531195276931, "2017": 7750.60589383099, "2018": 8121.265322459599, "2019": 8496.441687096612, "2020": 8789.773853004453, "2021": 8813.133036473708, "2022": 8800.239655776255, "2023": 8861.159753839996}};
+const YEARS_FOCUS = [1997, 2000];
+const VISIBLE = ["宝安区", "龙岗区"];
+const MARKS = [];
+const DISTRICT_COLORS = {"光明区":"#C0392B","南山区":"#E8A33D","坪山区":"#2E8B57","宝安区":"#2980B9","盐田区":"#8E44AD","福田区":"#16A085","罗湖区":"#D35400","龙华区":"#2C3E50","龙岗区":"#7FB800"};
+const CITY_COLOR = "#1f2933";
 
-function colorOf(d){ return COLORS[districts.indexOf(d)]; }
-// 人口总量按 万人 绘制；密度按 人/km²
-function buildSeries(d, metric){
-  const b=state.yearsFocus;
-  const pts=[];
-  if(d===CITY){
-    const src = metric==="pop" ? DATA.cityPop : DATA.cityDens;
-    for(const y of years){
-      if(b && (y<b[0]||y>b[1])) continue;
-      const v = src[String(y)];
-      if(v==null) continue;
-      pts.push({year:+y, v: metric==="pop" ? v/10000 : v});
-    }
-  } else {
-    const rec = DATA.recs[d];
-    for(const y of years){
-      if(b && (y<b[0]||y>b[1])) continue;
-      const r = rec[String(y)];
-      if(!r) continue;
-      pts.push({year:+y, v: metric==="pop" ? r[0]/10000 : r[1]});
-    }
+function filterYears(){
+  const all = POP_DATA.years;
+  if(!YEARS_FOCUS) return all;
+  return all.filter(y => y >= YEARS_FOCUS[0] && y <= YEARS_FOCUS[1]);
+}
+function buildSeries(metric, years){
+  const series = [];
+  series.push({
+    name:"深圳市（全市合计）",
+    type:"line",
+    data: years.map(y => {
+      const v = metric === "pop" ? POP_DATA.cityPop[String(y)] : POP_DATA.cityDens[String(y)];
+      return v == null ? null : (metric === "pop" ? v / 10000 : v);
+    }),
+    lineStyle:{width:3.5,color:CITY_COLOR},
+    itemStyle:{color:CITY_COLOR},
+    symbol:"circle",
+    symbolSize:5,
+    smooth:false,
+    z:10
+  });
+  for(const d of POP_DATA.districts){
+    series.push({
+      name:d,
+      type:"line",
+      data: years.map(y => {
+        const rec = POP_DATA.recs[d] && POP_DATA.recs[d][String(y)];
+        if(!rec) return null;
+        return metric === "pop" ? rec[0] / 10000 : rec[1];
+      }),
+      lineStyle:{width:2,color:DISTRICT_COLORS[d]},
+      itemStyle:{color:DISTRICT_COLORS[d]},
+      symbol:"circle",
+      symbolSize:3,
+      smooth:false
+    });
   }
-  return pts;
+  return series;
 }
-
-function niceMax(v){
-  if(v<=0) return 1;
-  const pow=Math.pow(10,Math.floor(Math.log10(v)));
-  const n=v/pow; let m;
-  if(n<=1)m=1; else if(n<=2)m=2; else if(n<=2.5)m=2.5; else if(n<=5)m=5; else m=10;
-  return m*pow;
-}
-
-function fmt(v, metric){ return metric==="pop" ? v.toFixed(0) : v.toFixed(0); }
-
-function drawChart(svgId, tipId, metric){
-  const svg=document.getElementById(svgId);
-  const tip=document.getElementById(tipId);
-  svg.innerHTML="";
-  const lines=[];
-  if(state.showCity) lines.push({key:CITY, color:"#1f2933", series:buildSeries(CITY,metric), bold:true});
-  districts.forEach(d=>{ if(state.visible.has(d)) lines.push({key:d, color:colorOf(d), series:buildSeries(d,metric), bold:false}); });
-  let maxV=0;
-  lines.forEach(l=>l.series.forEach(p=>{ if(p.v>maxV)maxV=p.v; }));
-  maxV=niceMax(maxV||1);
-  const x0=M.l,x1=W-M.r,y0=H-M.b,y1=M.t;
-  const xb=xBounds();
-  const xOf=y=>x0+(y-xb[0])/(xb[1]-xb[0])*(x1-x0);
-  const yOf=v=>y0-v/maxV*(y0-y1);
-  const ticks=5;
-  for(let i=0;i<=ticks;i++){
-    const v=maxV*i/ticks, yy=yOf(v);
-    svg.insertAdjacentHTML("beforeend",`<line class="gridline" x1="${x0}" y1="${yy}" x2="${x1}" y2="${yy}"/>`);
-    svg.insertAdjacentHTML("beforeend",`<text class="axis" x="${x0-8}" y="${yy+4}" text-anchor="end">${fmt(v,metric)}</text>`);
-  }
-  const step=years.length>15?3:2;
-  years.forEach(y=>{
-    if(y<xb[0]||y>xb[1]) return;
-    if(y===xb[0]||y===xb[1]||y%step===0)
-      svg.insertAdjacentHTML("beforeend",`<text class="axis" x="${xOf(y)}" y="${y0+18}" text-anchor="middle">${y}</text>`);
-  });
-  svg.insertAdjacentHTML("beforeend",`<line class="axis" x1="${x0}" y1="${y0}" x2="${x1}" y2="${y0}"/>`);
-  svg.insertAdjacentHTML("beforeend",`<line class="axis" x1="${x0}" y1="${y1}" x2="${x0}" y2="${y0}"/>`);
-  const ylab = metric==="pop" ? "人口总量（万人）" : "人口密度（人/km²）";
-  svg.insertAdjacentHTML("beforeend",`<text class="axis" x="15" y="${(y0+y1)/2}" text-anchor="middle" transform="rotate(-90 15 ${(y0+y1)/2})">${ylab}</text>`);
-  lines.forEach(l=>{
-    const pts=l.series;
-    if(pts.length<2) return;
-    const d=pts.map((p,i)=>(i?"L":"M")+xOf(p.year)+" "+yOf(p.v)).join(" ");
-    const w=l.bold?3.4:2.2;
-    svg.insertAdjacentHTML("beforeend",`<path class="aline" d="${d}" stroke="${l.color}" stroke-width="${w}"/>`);
-    pts.forEach(p=>svg.insertAdjacentHTML("beforeend",`<circle cx="${xOf(p.year)}" cy="${yOf(p.v)}" r="${l.bold?3:2.4}" fill="${l.color}" stroke="#fff" stroke-width="1"/>`));
-  });
-  (state.marks||[]).forEach(mk=>{
-    const mx=xOf(mk.year);
-    svg.insertAdjacentHTML("beforeend",`<line x1="${mx}" y1="${y1}" x2="${mx}" y2="${y0}" stroke="${mk.color||'#8a8a8a'}" stroke-width="1.4" stroke-dasharray="4 3"/>`);
-    svg.insertAdjacentHTML("beforeend",`<text x="${mx+5}" y="${y1+13}" fill="${mk.color||'#8a8a8a'}" font-size="11">${mk.label||mk.year}</text>`);
-  });
-  const ov=document.createElementNS("http://www.w3.org/2000/svg","rect");
-  ov.setAttribute("x",x0); ov.setAttribute("y",y1); ov.setAttribute("width",x1-x0); ov.setAttribute("height",y0-y1);
-  ov.setAttribute("fill","transparent"); ov.style.cursor="crosshair";
-  svg.appendChild(ov);
-  ov.addEventListener("mousemove",e=>onHover(e,svg,tip,metric,x0,x1,y0,y1,xOf,yOf));
-  ov.addEventListener("mouseleave",()=>{ tip.style.opacity=0; const hl=svg.querySelector("#hl"); if(hl)hl.remove(); });
-}
-
-function onHover(ev,svg,tip,metric,x0,x1,y0,y1,xOf,yOf){
-  const rect=svg.getBoundingClientRect();
-  const sx=(ev.clientX-rect.left)/rect.width*W;
-  const b=xBounds();
-  let yr=Math.round(b[0]+(sx-x0)/(x1-x0)*(b[1]-b[0]));
-  yr=Math.max(b[0],Math.min(b[1],yr));
-  if(yr<b[0]||yr>b[1]) return;
-  const hl=svg.querySelector("#hl"); if(hl)hl.remove();
-  svg.insertAdjacentHTML("beforeend",`<line class="hoverline" id="hl" x1="${xOf(yr)}" y1="${y1}" x2="${xOf(yr)}" y2="${y0}"/>`);
-  let rows="";
-  const add=(label,color,v)=>{ if(v==null)return; const unit=metric==="pop"?" 万人":" 人/km²"; rows+=`<div><span style="color:${color}">■</span> ${label}: <b>${v.toFixed(metric==="pop"?0:0)}</b>${unit}</div>`; };
-  if(state.showCity) add("深圳市（全市合计）","#1f2933", metric==="pop"?DATA.cityPop[String(yr)]/10000:DATA.cityDens[String(yr)]);
-  districts.forEach(d=>{ if(state.visible.has(d)){ const r=DATA.recs[d][String(yr)]; if(r) add(d,colorOf(d), metric==="pop"?r[0]/10000:r[1]); } });
-  tip.innerHTML=`<b>${yr} 年</b>${rows}`;
-  tip.style.opacity=1;
-  const card=svg.parentElement.getBoundingClientRect();
-  let tx=ev.clientX-card.left+14, ty=ev.clientY-card.top+14;
-  if(tx+180>card.width) tx=ev.clientX-card.left-188;
-  tip.style.left=tx+"px"; tip.style.top=ty+"px";
-}
-
-// ---- UI ----
-const chips=document.getElementById("chips");
-districts.forEach(d=>{
-  const c=document.createElement("div"); c.className="chip";
-  c.innerHTML='<span class="dot" style="color:'+colorOf(d)+'"></span>'+d;
-  c.onclick=()=>{
-    if(state.visible.has(d)){ state.visible.delete(d); c.classList.add("off"); }
-    else { state.visible.add(d); c.classList.remove("off"); }
-    chips.querySelectorAll(".chip").forEach((c,i)=>{ c.classList.toggle("off", !state.visible.has(districts[i])); });
-cityBtn.classList.toggle("off", !state.showCity);
-renderAll();
+function render(id, metric, yName, years){
+  const series = buildSeries(metric, years);
+  const selected = {};
+  series.forEach(s => { selected[s.name] = (s.name === "深圳市（全市合计）") || VISIBLE.includes(s.name); });
+  const option = {
+    title:{text:yName, left:"center", top:10, textStyle:{fontSize:16, color:"#1f2933", fontWeight:600}},
+    tooltip:{
+      trigger:"axis",
+      backgroundColor:"rgba(31,41,51,.96)",
+      borderColor:"rgba(31,41,51,.96)",
+      textStyle:{color:"#fff"},
+      formatter:function(params){
+        let html = "<b>" + params[0].axisValue + "年</b>";
+        params.forEach(p => {
+          if(p.value == null) return;
+          const unit = metric === "pop" ? " 万人" : " 人/km²";
+          html += '<div style="margin-top:4px;"><span style="display:inline-block;margin-right:6px;border-radius:2px;width:10px;height:10px;background:' + p.color + ';"></span>' + p.seriesName + ': <b>' + p.value.toFixed(0) + '</b>' + unit + '</div>';
+        });
+        return html;
+      }
+    },
+    legend:{type:"scroll", top:42, data:series.map(s=>s.name), selected:selected, textStyle:{color:"#1f2933"}},
+    grid:{left:60, right:60, top:90, bottom:40, containLabel:true},
+    xAxis:{
+      type:"category",
+      boundaryGap:false,
+      data:years.map(String),
+      axisLabel:{color:"#6b7280"},
+      axisLine:{lineStyle:{color:"#e6eaf0"}},
+      splitLine:{show:false}
+    },
+    yAxis:{
+      type:"value",
+      name:yName,
+      nameTextStyle:{color:"#1f2933", align:"right", padding:[0,8,0,0]},
+      axisLabel:{color:"#6b7280"},
+      splitLine:{lineStyle:{color:"#e6eaf0", type:"dashed"}}
+    },
+    series: series.map((s, idx) => {
+      const cfg = Object.assign({}, s);
+      if(idx === 0 && MARKS.length){
+        cfg.markLine = {
+          symbol:"none",
+          data: MARKS.map(m => ({
+            xAxis: String(m.year),
+            label:{formatter:m.label, color:m.color, position:"end"},
+            lineStyle:{color:m.color, type:"dashed", width:1.5}
+          }))
+        };
+      }
+      return cfg;
+    })
   };
-  chips.appendChild(c);
-});
+  const chart = echarts.init(document.getElementById(id));
+  chart.setOption(option);
+  window.addEventListener("resize", () => chart.resize());
+  return chart;
+}
+const years = filterYears();
+render("chart-pop", "pop", "人口总量（万人）", years);
+render("chart-dens", "dens", "人口密度（人/km²）", years);
 
-const cityBtn=document.getElementById("cityBtn");
-cityBtn.onclick=()=>{ state.showCity=!state.showCity; cityBtn.classList.toggle("off",!state.showCity); renderAll(); };
-
-const legend=document.getElementById("legend");
-legend.insertAdjacentHTML("beforeend",'<span><i style="color:#1f2933"></i>深圳市（全市合计 / 平均）</span>');
-districts.forEach(d=>legend.insertAdjacentHTML("beforeend",'<span><i style="color:'+colorOf(d)+'"></i>'+d+'</span>'));
-
-function renderAll(){ drawChart("chartPop","tipPop","pop"); drawChart("chartDens","tipDens","dens"); }
-
-document.getElementById("note").innerHTML=
- "数据口径：人口总量 pop_total（人）、密度 density（人/km²）取自《深圳城市化_1992_2023_正式行政区口径》geojson 的逐年行政区统计（1997–2023）。"+
- " 早期「宝安县」已并入「宝安区」以保证序列连续。"+
- " 行政区划变迁导致台阶式变化属正常现象：1998 年盐田设区（从罗湖析出）、2017 年龙华/坪山设区（从宝安/龙岗析出）、2018 年光明设区（从宝安析出）。"+
- " 因此宝安、龙岗在 2017–2018 年总量出现下降（人口已划归新区），而「深圳市（全市合计）」线已把新区计入，呈平滑上升。"+
- " 龙岗区含大鹏新区（功能区，不单列统计），其绝对人口约为官方口径 2 倍，内部趋势仍有效。"+
- " 罗湖区 1997 年密度偏低，因其当年辖区面积仍含后来析出的盐田部分。"+
- " 趋势注记：2022 年全市合计出现设市以来首次微降、2023 年随即反弹创阶段新高（与统计公报‘2022 首降、2023 反弹’趋势一致；行政区口径绝对量级与公报有小幅差异）。";
-
-renderAll();
+document.getElementById("note").innerHTML = `数据口径：人口总量 pop_total（人）、密度 density（人/km²）取自《深圳城市化_1992_2023_正式行政区口径》geojson 的逐年行政区统计（1997–2023）。早期「宝安县」已并入「宝安区」以保证序列连续。行政区划变迁导致台阶式变化属正常现象：1998 年盐田设区（从罗湖析出）、2017 年龙华/坪山设区（从宝安/龙岗析出）、2018 年光明设区（从宝安析出）。因此宝安、龙岗在 2017–2018 年总量出现下降（人口已划归新区），而「深圳市（全市合计）」线已把新区计入，呈平滑上升。龙岗区含大鹏新区（功能区，不单列统计），其绝对人口约为官方口径 2 倍，内部趋势仍有效。罗湖区 1997 年密度偏低，因其当年辖区面积仍含后来析出的盐田部分。趋势注记：2022 年全市合计出现设市以来首次微降、2023 年随即反弹创阶段新高（与统计公报‘2022 首降、2023 反弹’趋势一致；行政区口径绝对量级与公报有小幅差异）。`;
 </script>
 </body>
 </html>
