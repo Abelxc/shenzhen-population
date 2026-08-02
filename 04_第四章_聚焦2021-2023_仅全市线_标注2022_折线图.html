@@ -8,7 +8,7 @@
 
 <meta name="viewport" content="width=device-width, initial-scale=1.0">
 
-<title>2022 拐点：高位平台期的 V 形（聚焦 2021–2023）</title>
+<title>2022 首降：高位平台期的 V 形（聚焦 2021–2023）</title>
 
 <script src="https://cdn.jsdelivr.net/npm/echarts@5.5.0/dist/echarts.min.js"></script>
 
@@ -36,7 +36,7 @@
 
 <div class="wrap">
 
-  <header><h1>2022 拐点：高位平台期的 V 形（聚焦 2021–2023）</h1></header>
+  <header><h1>2022 首降：高位平台期的 V 形（聚焦 2021–2023）</h1></header>
 
   <div class="card"><div id="chart-pop" class="chart"></div></div>
 
@@ -240,7 +240,7 @@ function render(id, metric, yName, years){
 
             xAxis: String(m.year),
 
-            label:{formatter:m.label, color:m.color, position:"insideEndBottom", backgroundColor:"rgba(255,255,255,0.92)", padding:[2,4], borderRadius:3, fontWeight:600},
+            label:{formatter:"\u2193 "+m.label, color:m.color, position:"end", distance:30, backgroundColor:"rgba(255,255,255,0.92)", padding:[3,5], borderRadius:3, fontWeight:600},
 
             lineStyle:{color:m.color, type:"dashed", width:1.5}
 
